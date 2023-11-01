@@ -1,18 +1,23 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'pipeline factory converter action'
+description:
+  'to convert the pipeline factory to github action that controlled by DevOps'
+author: 'KBTG DevOps Team'
 
 # Define your inputs here.
+# inputs:
+#   milliseconds:
+#     description: 'Your input description here'
+#     required: true
+#     default: '1000'
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  token:
     required: true
-    default: '1000'
+    description: 'Github token'
 
 # Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+# outputs:
+#   time:
+#     description: 'Your output description here'
 
 runs:
   using: node20
