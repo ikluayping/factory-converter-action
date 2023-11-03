@@ -1,5 +1,5 @@
 name: Continuous Integration
-
+concurrency: 1
 on:
   pull_request:
   push:

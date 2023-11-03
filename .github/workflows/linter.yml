@@ -1,5 +1,5 @@
 name: Lint Code Base
-
+concurrency: 1
 on:
   pull_request:
     branches:
