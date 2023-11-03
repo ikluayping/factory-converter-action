@@ -1,0 +1,12 @@
+name: <%= MODULE_NAME %>
+on:
+  push: 
+    branches: [<%= TARGET_BRANCH %>]
+  workflow_dispatch:
+
+jobs:
+  <%= MODULE_NAME %>: 
+    uses: ikluayping/pipeline-template/.github/workflows/dev-openshift.yml@main
+    with:
+      repository: ${{github.env.GITHUB_REPOSITORY}}
+      ref: ${{github.env.GITHUB_SHA}}

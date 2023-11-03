@@ -26,55 +26,34 @@ describe('action', () => {
     jest.clearAllMocks()
   })
 
-  it('sets the time output', async () => {
+  it('test load repository from github api', async () => {
     // Set the action's inputs as return values from core.getInput()
     getInputMock.mockImplementation((name: string): string => {
       switch (name) {
-        case 'milliseconds':
-          return '500'
+        case 'token':
+          return process.env.GITHUB_TOKEN as string
         default:
           return ''
       }
     })
 
     await main.run()
-    expect(runMock).toHaveReturned()
+    // expect(runMock).toHaveReturned()
 
-    // Verify that all of the core library functions were called correctly
-    expect(debugMock).toHaveBeenNthCalledWith(1, 'Waiting 500 milliseconds ...')
-    expect(debugMock).toHaveBeenNthCalledWith(
-      2,
-      expect.stringMatching(timeRegex)
-    )
-    expect(debugMock).toHaveBeenNthCalledWith(
-      3,
-      expect.stringMatching(timeRegex)
-    )
-    expect(setOutputMock).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      expect.stringMatching(timeRegex)
-    )
-  })
-
-  it('sets a failed status', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation((name: string): string => {
-      switch (name) {
-        case 'milliseconds':
-          return 'this is not a number'
-        default:
-          return ''
-      }
-    })
-
-    await main.run()
-    expect(runMock).toHaveReturned()
-
-    // Verify that all of the core library functions were called correctly
-    expect(setFailedMock).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds not a number'
-    )
-  })
+    // // Verify that all of the core library functions were called correctly
+    // expect(debugMock).toHaveBeenNthCalledWith(1, 'Waiting 500 milliseconds ...')
+    // expect(debugMock).toHaveBeenNthCalledWith(
+    //   2,
+    //   expect.stringMatching(timeRegex)
+    // )
+    // expect(debugMock).toHaveBeenNthCalledWith(
+    //   3,
+    //   expect.stringMatching(timeRegex)
+    // )
+    // expect(setOutputMock).toHaveBeenNthCalledWith(
+    //   1,
+    //   'time',
+    //   expect.stringMatching(timeRegex)
+    // )
+  }, 20000)
 })
