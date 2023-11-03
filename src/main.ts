@@ -87,7 +87,12 @@ const devOpenshiftPipeline = async (
   const fileContent = template({
     MODULE_NAME: params.moduleName,
     TARGET_BRANCH:
-      params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab.branch
+      params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab.branch,
+    PIPELINE_TEMPLATE:
+      'ikluayping/pipeline-template/.github/workflows/dev-openshift.yml@main',
+    FACTORY_REPO: process.env.GITHUB_REPOSITORY,
+    FACTORY_BRANCH: process.env.GITHUB_REF_NAME,
+    DEV_PIPELINE: ''
   })
 
   // check if file exists
@@ -134,6 +139,7 @@ const devOpenshiftPipeline = async (
 }
 type DefaultDevPipeline = {
   devPipelineObject: any
+  devPipelinePath: string
   moduleName: string
   owner: string
 }
@@ -167,7 +173,8 @@ const processDevPipeline = async (
             await devOpenshiftPipeline(client, {
               moduleName,
               devPipelineObject: devPipeline,
-              owner: params.owner
+              owner: params.owner,
+              devPipelinePath: pipelinePath
             })
             break
           default:

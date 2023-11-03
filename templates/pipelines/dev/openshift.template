@@ -6,7 +6,8 @@ on:
 
 jobs:
   <%= MODULE_NAME %>: 
-    uses: ikluayping/pipeline-template/.github/workflows/dev-openshift.yml@main
+    uses: <%= PIPELINE_TEMPLATE %>
     with:
-      repository: ${{github.env.GITHUB_REPOSITORY}}
-      ref: ${{github.env.GITHUB_SHA}}
+      factoryRepo: "<%= FACTORY_REPO %>"
+      factoryBranch: "<%= FACTORY_BRANCH %>"
+      devPipeline: "<%= DEV_PIPELINE %>"
