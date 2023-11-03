@@ -26722,7 +26722,6 @@ const yaml_1 = __importDefault(__nccwpck_require__(4083));
 const octokit_1 = __nccwpck_require__(7467);
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const ejs_1 = __importDefault(__nccwpck_require__(8431));
-const fs_1 = __nccwpck_require__(7147);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -26767,8 +26766,22 @@ async function run() {
 exports.run = run;
 const encodeB64 = (str) => Buffer.from(str, 'utf-8').toString('base64');
 const decodeB64 = (str) => Buffer.from(str, 'base64').toString('utf-8');
+const getTemplateFileContent = async (client, path, params) => {
+    const response = await client.rest.repos.getContent({
+        owner: params.owner,
+        repo: 'factory-converter-action',
+        path
+    });
+    if (!Array.isArray(response.data)) {
+        if (response.data.type === 'file' && response.data.content) {
+            const content = decodeB64(response.data.content);
+            return Promise.resolve(content);
+        }
+    }
+    return Promise.resolve('');
+};
 const devOpenshiftPipeline = async (client, params) => {
-    const result = (0, fs_1.readFileSync)('./templates/pipelines/dev/openshift.template', 'utf8');
+    const result = await getTemplateFileContent(client, 'templates/pipelines/dev/openshift.template', params);
     const template = ejs_1.default.compile(result);
     const fileContent = template({
         MODULE_NAME: params.moduleName,
