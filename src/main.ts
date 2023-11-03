@@ -92,20 +92,33 @@ const devOpenshiftPipeline = async (
       'ikluayping/pipeline-template/.github/workflows/dev-openshift.yml@main',
     FACTORY_REPO: process.env.GITHUB_REPOSITORY,
     FACTORY_BRANCH: process.env.GITHUB_REF_NAME,
-    DEV_PIPELINE: ''
+    DEV_PIPELINE: params.devPipelinePath
   })
 
   // check if file exists
-  const fileCheck = await client.rest.repos.getContent({
-    path: `.github/workflows/${params.moduleName}.yml`,
-    owner: params.owner,
-    repo: params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab.projectId
-      ?.replace(params.owner as string, '')
-      .substring(1),
-    branch:
-      params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab.branch
-  })
-  if (!Array.isArray(fileCheck.data)) {
+  const fileCheck = await client.rest.repos
+    .getContent({
+      path: `.github/workflows/${params.moduleName}.yml`,
+      owner: params.owner,
+      repo: params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab.projectId
+        ?.replace(params.owner as string, '')
+        .substring(1),
+      branch:
+        params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab
+          .branch
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  let doCreate = false
+  if (
+    fileCheck &&
+    !Array.isArray(fileCheck.data) &&
+    fileCheck.data.type === 'file' &&
+    fileCheck.data.content &&
+    fileCheck.data.content.replaceAll('\n', '') !== encodeB64(fileContent)
+  ) {
+    doCreate = true
     await client.rest.repos.deleteFile({
       sha: fileCheck.data.sha,
       owner: params.owner,
@@ -115,27 +128,28 @@ const devOpenshiftPipeline = async (
       branch:
         params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab
           .branch,
-      message: '',
+      message: 'remove file if exists (for udpate)',
       path: `.github/workflows/${params.moduleName}.yml`
     })
   }
 
-  await client.rest.repos
-    .createOrUpdateFileContents({
-      owner: params.owner,
-      repo: params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab.projectId
-        ?.replace(params.owner as string, '')
-        .substring(1),
-      branch:
-        params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab
-          .branch,
-      content: encodeB64(fileContent),
-      message: 'add/update file from action',
-      path: `.github/workflows/${params.moduleName}.yml`
-    })
-    .catch(err => {
-      console.log(err)
-    })
+  if (!fileCheck || doCreate)
+    await client.rest.repos
+      .createOrUpdateFileContents({
+        owner: params.owner,
+        repo: params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab.projectId
+          ?.replace(params.owner as string, '')
+          .substring(1),
+        branch:
+          params.devPipelineObject.template.spec.stages.pullCode.spec.gitlab
+            .branch,
+        content: encodeB64(fileContent),
+        message: 'add/update file from action',
+        path: `.github/workflows/${params.moduleName}.yml`
+      })
+      .catch(err => {
+        console.log(err)
+      })
 }
 type DefaultDevPipeline = {
   devPipelineObject: any
