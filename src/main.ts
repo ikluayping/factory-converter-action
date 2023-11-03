@@ -54,14 +54,35 @@ const encodeB64 = (str: string): string =>
 const decodeB64 = (str: string): string =>
   Buffer.from(str, 'base64').toString('utf-8')
 
+const getTemplateFileContent = async (
+  client: Octokit,
+  path: string,
+  params: DefaultDevPipeline
+): Promise<string> => {
+  const response = await client.rest.repos.getContent({
+    owner: params.owner,
+    repo: 'factory-converter-action',
+    path
+  })
+  if (!Array.isArray(response.data)) {
+    if (response.data.type === 'file' && response.data.content) {
+      const content = decodeB64(response.data.content)
+      return Promise.resolve(content)
+    }
+  }
+  return Promise.resolve('')
+}
+
 const devOpenshiftPipeline = async (
   client: Octokit,
   params: DefaultDevPipeline
 ) => {
-  const result = readFileSync(
-    './templates/pipelines/dev/openshift.template',
-    'utf8'
+  const result = await getTemplateFileContent(
+    client,
+    'templates/pipelines/dev/openshift.template',
+    params
   )
+
   const template = ejs.compile(result)
   const fileContent = template({
     MODULE_NAME: params.moduleName,
